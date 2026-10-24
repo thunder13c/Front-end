@@ -27,7 +27,13 @@
     if (!max) return [themes[0]?.id].filter(Boolean);
     return ranked.filter(x=>x.score>=3 && x.score>=max*.27).slice(0,3).map(x=>x.id);
   }
-  function planForThemes(ids, themes, books) {
+  function randomUnit(seed, key) {
+    let h=(seed>>>0)||1;
+    for(const c of String(key)){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}
+    h^=h>>>16;h=Math.imul(h,0x7feb352d);h^=h>>>15;
+    return (h>>>0)/4294967295;
+  }
+  function planForThemes(ids, themes, books, seed=0) {
     const selected = [...new Set(ids)].map(id=>themes.find(t=>t.id===id)).filter(Boolean).slice(0,3);
     if (!selected.length) return {themes:[],items:[]};
     const candidates = new Map();
@@ -56,6 +62,8 @@
           s+=(hits.size-1)*120;
           s+=c.matches.reduce((sum,m)=>sum+(4-m.rank)*100/(1+m.themeIndex*.35),0);
           if(typeof c.book.id==="number")s+=10;
+          // Bounded exploration: never overrides the matched-theme relevance rules.
+          s+=randomUnit(seed,c.key)*160;
           return s;
         }
         return merit(b)-merit(a)||a.matches[0].themeIndex-b.matches[0].themeIndex;

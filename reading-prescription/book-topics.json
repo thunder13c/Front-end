@@ -1,0 +1,928 @@
+{
+  "schemaVersion": 1,
+  "curationNotice": "도서명·저자와 일부 독서 해설에 근거한 추천 주제 태그입니다. 전체 도서의 본문을 검증한 주석이 아닙니다.",
+  "books": {
+    "1": [
+      "identity",
+      "decisions",
+      "creativity",
+      "dream",
+      "freedom"
+    ],
+    "2": [
+      "burnout",
+      "lonely",
+      "meaning",
+      "art"
+    ],
+    "3": [
+      "meaning",
+      "learning",
+      "history"
+    ],
+    "4": [
+      "burnout",
+      "esteem",
+      "relationships",
+      "habits"
+    ],
+    "5": [
+      "society",
+      "history"
+    ],
+    "6": [
+      "career",
+      "esteem",
+      "relationships",
+      "identity",
+      "decisions",
+      "responsibility",
+      "freedom"
+    ],
+    "7": [
+      "society",
+      "learning",
+      "history"
+    ],
+    "8": [
+      "career",
+      "burnout",
+      "grief",
+      "health",
+      "history"
+    ],
+    "9": [
+      "relationships"
+    ],
+    "10": [
+      "money",
+      "society",
+      "responsibility"
+    ],
+    "11": [
+      "creativity",
+      "learning",
+      "technology"
+    ],
+    "12": [
+      "society",
+      "responsibility",
+      "freedom",
+      "history"
+    ],
+    "13": [
+      "society",
+      "history"
+    ],
+    "14": [
+      "family",
+      "identity",
+      "meaning",
+      "responsibility",
+      "history"
+    ],
+    "15": [
+      "lonely",
+      "family",
+      "grief",
+      "nature"
+    ],
+    "16": [
+      "lonely",
+      "failure",
+      "identity",
+      "meaning",
+      "dream",
+      "freedom",
+      "art"
+    ],
+    "17": [
+      "career",
+      "burnout",
+      "decisions",
+      "habits",
+      "focus",
+      "health"
+    ],
+    "18": [
+      "esteem",
+      "relationships",
+      "lonely",
+      "identity",
+      "freedom"
+    ],
+    "19": [
+      "future",
+      "identity",
+      "meaning",
+      "creativity",
+      "focus",
+      "dream",
+      "learning"
+    ],
+    "20": [
+      "future",
+      "breakup",
+      "failure",
+      "decisions",
+      "dream"
+    ],
+    "21": [
+      "creativity",
+      "art",
+      "learning",
+      "history"
+    ],
+    "22": [
+      "meaning",
+      "learning",
+      "history"
+    ],
+    "23": [
+      "relationships",
+      "love",
+      "family",
+      "responsibility"
+    ],
+    "24": [
+      "society",
+      "learning",
+      "technology"
+    ],
+    "25": [
+      "creativity",
+      "technology"
+    ],
+    "26": [
+      "future",
+      "career",
+      "society",
+      "technology"
+    ],
+    "27": [
+      "relationships",
+      "decisions",
+      "habits",
+      "focus"
+    ],
+    "28": [
+      "failure",
+      "creativity",
+      "dream",
+      "art"
+    ],
+    "29": [
+      "failure",
+      "creativity",
+      "dream",
+      "art"
+    ],
+    "30": [
+      "career",
+      "burnout",
+      "lonely",
+      "identity"
+    ],
+    "31": [
+      "creativity",
+      "habits",
+      "learning"
+    ],
+    "32": [
+      "esteem",
+      "relationships",
+      "habits",
+      "learning",
+      "health"
+    ],
+    "33": [
+      "esteem",
+      "habits",
+      "learning",
+      "health"
+    ],
+    "34": [
+      "learning",
+      "technology"
+    ],
+    "35": [
+      "family",
+      "responsibility",
+      "freedom"
+    ],
+    "36": [
+      "future",
+      "career",
+      "money",
+      "society",
+      "learning",
+      "technology"
+    ],
+    "37": [
+      "relationships",
+      "love",
+      "breakup",
+      "family",
+      "identity",
+      "decisions",
+      "dream",
+      "responsibility",
+      "freedom"
+    ],
+    "38": [
+      "society",
+      "freedom",
+      "learning",
+      "history"
+    ],
+    "39": [
+      "failure",
+      "identity",
+      "meaning",
+      "decisions",
+      "dream",
+      "nature"
+    ],
+    "40": [
+      "money",
+      "society",
+      "history"
+    ],
+    "41": [],
+    "42": [
+      "esteem",
+      "failure",
+      "identity",
+      "decisions",
+      "habits",
+      "freedom"
+    ],
+    "43": [
+      "relationships",
+      "breakup",
+      "lonely",
+      "family",
+      "grief"
+    ],
+    "44": [
+      "burnout",
+      "lonely",
+      "identity",
+      "meaning",
+      "creativity",
+      "art"
+    ],
+    "45": [
+      "society",
+      "responsibility",
+      "history"
+    ],
+    "46": [
+      "creativity",
+      "art"
+    ],
+    "47": [
+      "esteem",
+      "lonely",
+      "grief",
+      "failure",
+      "identity",
+      "meaning",
+      "decisions",
+      "health"
+    ],
+    "48": [
+      "identity",
+      "society",
+      "responsibility",
+      "freedom",
+      "technology"
+    ],
+    "49": [
+      "future",
+      "creativity",
+      "learning",
+      "technology",
+      "nature"
+    ],
+    "50": [
+      "esteem",
+      "relationships",
+      "habits",
+      "learning",
+      "health"
+    ],
+    "51": [
+      "creativity",
+      "focus",
+      "dream",
+      "art",
+      "learning"
+    ],
+    "52": [
+      "society",
+      "responsibility"
+    ],
+    "53": [
+      "society",
+      "learning",
+      "history"
+    ],
+    "54": [],
+    "55": [
+      "burnout",
+      "meaning",
+      "habits",
+      "health"
+    ],
+    "56": [
+      "society",
+      "history"
+    ],
+    "57": [
+      "creativity",
+      "art",
+      "technology"
+    ],
+    "58": [
+      "career",
+      "failure",
+      "decisions",
+      "dream",
+      "responsibility"
+    ],
+    "59": [
+      "esteem",
+      "relationships",
+      "family",
+      "failure",
+      "identity",
+      "nature"
+    ],
+    "60": [
+      "burnout",
+      "breakup",
+      "family",
+      "grief"
+    ],
+    "61": [
+      "relationships",
+      "love",
+      "family",
+      "meaning",
+      "responsibility"
+    ],
+    "62": [
+      "family",
+      "grief",
+      "meaning",
+      "responsibility",
+      "health"
+    ],
+    "63": [
+      "burnout",
+      "esteem",
+      "relationships",
+      "love",
+      "breakup",
+      "lonely",
+      "family",
+      "grief",
+      "identity",
+      "meaning",
+      "decisions",
+      "creativity",
+      "habits",
+      "dream",
+      "responsibility",
+      "freedom",
+      "art"
+    ],
+    "64": [
+      "family",
+      "health"
+    ],
+    "65": [
+      "burnout",
+      "relationships",
+      "lonely"
+    ],
+    "66": [
+      "society",
+      "creativity",
+      "learning",
+      "technology",
+      "health",
+      "nature"
+    ],
+    "67": [
+      "future",
+      "burnout",
+      "esteem",
+      "failure",
+      "identity",
+      "meaning",
+      "decisions",
+      "creativity",
+      "focus",
+      "dream",
+      "freedom"
+    ],
+    "68": [
+      "future",
+      "career",
+      "decisions",
+      "creativity",
+      "habits",
+      "focus",
+      "learning",
+      "technology",
+      "health"
+    ],
+    "69": [
+      "learning",
+      "history"
+    ],
+    "70": [
+      "learning",
+      "history"
+    ],
+    "71": [
+      "future",
+      "career",
+      "failure",
+      "decisions",
+      "creativity",
+      "focus",
+      "dream"
+    ],
+    "72": [
+      "relationships",
+      "love",
+      "breakup",
+      "identity",
+      "dream"
+    ],
+    "73": [
+      "creativity",
+      "art",
+      "learning"
+    ],
+    "74": [
+      "relationships",
+      "love",
+      "breakup",
+      "identity"
+    ],
+    "75": [
+      "future",
+      "career",
+      "failure",
+      "money",
+      "decisions",
+      "habits",
+      "focus"
+    ],
+    "76": [
+      "meaning",
+      "responsibility",
+      "freedom",
+      "history"
+    ],
+    "77": [
+      "creativity",
+      "habits",
+      "focus",
+      "art",
+      "learning",
+      "technology"
+    ],
+    "78": [
+      "society",
+      "learning",
+      "technology",
+      "history",
+      "nature"
+    ],
+    "79": [
+      "career",
+      "money",
+      "society",
+      "responsibility"
+    ],
+    "80": [
+      "future",
+      "esteem",
+      "lonely",
+      "identity",
+      "meaning",
+      "decisions",
+      "dream",
+      "freedom"
+    ],
+    "81": [
+      "future",
+      "money",
+      "society",
+      "history"
+    ],
+    "82": [
+      "family"
+    ],
+    "83": [
+      "career",
+      "burnout",
+      "relationships",
+      "love",
+      "breakup",
+      "lonely",
+      "family",
+      "grief",
+      "identity",
+      "meaning",
+      "responsibility"
+    ],
+    "84": [
+      "society",
+      "freedom",
+      "history"
+    ],
+    "85": [
+      "learning",
+      "history"
+    ],
+    "86": [
+      "creativity",
+      "art"
+    ],
+    "87": [
+      "money",
+      "society",
+      "responsibility"
+    ],
+    "88": [
+      "creativity",
+      "art"
+    ],
+    "89": [
+      "future",
+      "grief",
+      "failure",
+      "identity",
+      "meaning",
+      "decisions",
+      "creativity",
+      "dream",
+      "freedom",
+      "technology"
+    ],
+    "90": [
+      "meaning",
+      "money",
+      "society",
+      "nature"
+    ],
+    "91": [
+      "money",
+      "society",
+      "responsibility"
+    ],
+    "92": [
+      "history"
+    ],
+    "93": [
+      "burnout",
+      "esteem",
+      "lonely",
+      "failure",
+      "identity",
+      "meaning",
+      "decisions",
+      "health"
+    ],
+    "94": [
+      "future",
+      "grief",
+      "meaning",
+      "health"
+    ],
+    "95": [
+      "grief",
+      "society",
+      "creativity",
+      "art",
+      "technology",
+      "nature"
+    ],
+    "96": [
+      "family",
+      "identity",
+      "responsibility",
+      "freedom"
+    ],
+    "97": [
+      "future",
+      "career",
+      "creativity",
+      "focus",
+      "dream",
+      "art",
+      "learning"
+    ],
+    "98": [
+      "burnout",
+      "relationships",
+      "habits",
+      "responsibility",
+      "learning"
+    ],
+    "99": [
+      "learning",
+      "history"
+    ],
+    "100": [
+      "money",
+      "society",
+      "learning",
+      "history",
+      "nature"
+    ],
+    "101": [
+      "relationships",
+      "money",
+      "society",
+      "responsibility"
+    ],
+    "102": [
+      "failure",
+      "meaning",
+      "decisions",
+      "dream"
+    ],
+    "103": [
+      "esteem",
+      "relationships",
+      "lonely",
+      "identity",
+      "freedom"
+    ],
+    "104": [
+      "habits",
+      "health"
+    ],
+    "105": [
+      "freedom",
+      "art",
+      "learning",
+      "history"
+    ],
+    "106": [
+      "society",
+      "learning",
+      "history"
+    ],
+    "107": [
+      "creativity",
+      "art",
+      "learning"
+    ],
+    "108": [
+      "future",
+      "burnout",
+      "identity",
+      "meaning",
+      "habits",
+      "focus",
+      "health"
+    ],
+    "109": [
+      "career",
+      "failure",
+      "money",
+      "decisions"
+    ],
+    "110": [
+      "future",
+      "society",
+      "learning",
+      "technology",
+      "nature"
+    ],
+    "111": [],
+    "e1": [
+      "future",
+      "esteem",
+      "lonely",
+      "identity",
+      "decisions",
+      "dream",
+      "freedom"
+    ],
+    "e2": [
+      "burnout",
+      "lonely"
+    ],
+    "e3": [
+      "relationships",
+      "love",
+      "family",
+      "responsibility"
+    ],
+    "e4": [
+      "esteem",
+      "lonely",
+      "identity",
+      "meaning",
+      "freedom"
+    ],
+    "e5": [
+      "relationships",
+      "love",
+      "breakup",
+      "responsibility"
+    ],
+    "e6": [
+      "failure",
+      "decisions",
+      "dream",
+      "nature"
+    ],
+    "e7": [
+      "burnout",
+      "lonely",
+      "meaning",
+      "dream",
+      "freedom",
+      "nature"
+    ],
+    "e8": [
+      "future",
+      "lonely",
+      "identity",
+      "meaning",
+      "decisions",
+      "dream",
+      "freedom"
+    ],
+    "e9": [
+      "future",
+      "failure",
+      "decisions",
+      "creativity",
+      "dream"
+    ],
+    "e10": [
+      "relationships",
+      "love"
+    ],
+    "e11": [
+      "career",
+      "money",
+      "decisions",
+      "habits",
+      "focus",
+      "dream"
+    ],
+    "e12": [
+      "career",
+      "creativity",
+      "habits",
+      "focus"
+    ],
+    "e13": [
+      "career",
+      "failure",
+      "money",
+      "decisions",
+      "habits",
+      "focus",
+      "dream"
+    ],
+    "e14": [
+      "career",
+      "habits",
+      "focus"
+    ],
+    "e15": [],
+    "e16": [
+      "esteem",
+      "failure",
+      "identity",
+      "dream"
+    ],
+    "e17": [
+      "esteem",
+      "relationships",
+      "family",
+      "identity",
+      "freedom"
+    ],
+    "e18": [
+      "identity",
+      "society",
+      "creativity",
+      "dream",
+      "freedom",
+      "art"
+    ],
+    "e19": [
+      "family",
+      "society",
+      "history"
+    ],
+    "e20": [
+      "family",
+      "society",
+      "responsibility",
+      "freedom",
+      "history"
+    ],
+    "e21": [
+      "relationships",
+      "grief",
+      "meaning",
+      "responsibility"
+    ],
+    "e22": [
+      "esteem",
+      "identity",
+      "money"
+    ],
+    "e23": [
+      "career",
+      "burnout",
+      "lonely",
+      "grief",
+      "meaning"
+    ],
+    "e24": [
+      "future",
+      "breakup",
+      "grief",
+      "failure",
+      "meaning",
+      "decisions",
+      "dream"
+    ],
+    "e25": [
+      "career",
+      "love",
+      "identity",
+      "decisions",
+      "creativity",
+      "dream",
+      "responsibility",
+      "freedom",
+      "art"
+    ],
+    "e26": [
+      "meaning"
+    ],
+    "e27": [
+      "future",
+      "career",
+      "creativity",
+      "learning"
+    ],
+    "e28": [
+      "future",
+      "learning",
+      "technology"
+    ],
+    "e29": [
+      "future",
+      "esteem",
+      "identity",
+      "meaning",
+      "decisions",
+      "focus",
+      "dream",
+      "freedom"
+    ],
+    "e30": [
+      "burnout",
+      "lonely",
+      "art",
+      "nature"
+    ],
+    "e31": [],
+    "e32": [
+      "history"
+    ],
+    "e33": [
+      "relationships"
+    ],
+    "e34": [
+      "burnout",
+      "habits",
+      "health"
+    ],
+    "e35": [
+      "career",
+      "failure",
+      "decisions",
+      "habits",
+      "focus"
+    ]
+  }
+}

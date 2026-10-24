@@ -12,6 +12,8 @@
       for (const term of theme.keys || []) {
         const key = normal(term);
         if (!key || ignored.has(key) || key.length < 2) continue;
+        if (theme.id === "habits" && key === "집중" && /관심사|우선순위|선택과집중|하고싶은|여러가지/.test(text)) continue;
+        if (theme.id === "decisions" && key === "선택" && text.includes("선택과집중")) continue;
         if (text.includes(key)) score += key.length >= 4 ? 4 : 3;
       }
       if (theme.id === "focus" && /우선순위|선택과집중|관심사가|너무많은일/.test(text)) score += 5;
@@ -67,7 +69,7 @@
       const primary=matches[0].part;
       const labels=matches.map(m=>selected.find(t=>t.id===m.themeId)?.label).filter(Boolean);
       const reason=labels.length>1
-        ? primary[1].replace(/[.!?]+$/,"")+" — "+labels.join("·")+"을 함께 돌아보게 합니다."
+        ? primary[1].replace(/[.!?]+$/,"")+" — 연관 고민: "+labels.join("·")
         : primary[1];
       return {bookId:candidate.book.id,part:[candidate.book.id,reason,primary[2],primary[3]],themeIds:matches.map(m=>m.themeId),labels};
     });

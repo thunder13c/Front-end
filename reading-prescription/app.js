@@ -31,27 +31,87 @@
     if (content !== undefined) node.textContent = content;
     return node;
   }
-  async function getCover(book,img,container) {
-    const key = normalize(book.title+" "+book.author);
-    if(book.coverUrl && /^https:\/\//.test(book.coverUrl)){img.src=book.coverUrl;return;}
-    if (state.coverCache[key] === false) return;
-    if (state.coverCache[key]) { img.src = state.coverCache[key]; return; }
+  const coversPending=new Map();
+  async function fetchJson(url) {
+    const ctl=new AbortController();
+    const timer=setTimeout(()=>ctl.abort(),8000);
     try {
-      const title = book.title.split(/[:：]/)[0].replace(/(\s*vol\.\s*\d+|\s*개정판.*)$/i, "").trim();
-      const url = "https://www.googleapis.com/books/v1/volumes?q=" + encodeURIComponent("intitle:"+title) + "&maxResults=6&printType=books";
-      const controller = new AbortController();
-      const timer = setTimeout(()=>controller.abort(),6000);
-      let response;
-      try { response = await fetch(url,{signal:controller.signal}); } finally {clearTimeout(timer);}
-      if (!response.ok) throw Error("cover API");
-      const json = await response.json();
-      const expected = normalize(title).slice(0,6);
-      const match = (json.items || []).map(x=>x.volumeInfo || {}).find(x=>normalize(x.title).includes(expected) && x.imageLinks?.thumbnail);
-      const cover = match?.imageLinks?.thumbnail;
-      if (!cover) {state.coverCache[key] = false;return;}
-      state.coverCache[key] = cover.replace(/^http:/,"https:");
-      if (img.isConnected) img.src = state.coverCache[key];
-    } catch {state.coverCache[key] = false;}
+      const res=await fetch(url,{signal:ctl.signal,headers:{Accept:"application/json"}});
+      if(!res.ok)throw Error("cover API "+res.status);
+      return await res.json();
+    } finally {clearTimeout(timer);}
+  }
+  function coverTitle(book) {
+    return book.title.split(/[:：]/)[0].replace(/(\s*vol\.\s*\d+|\s*개정판.*)$/i,"").trim();
+  }
+  function validImageUrl(url) {
+    if(typeof url!=="string")return null;
+    try {const u=new URL(url.replace(/^http:/,"https:"));return u.protocol==="https:"?u.href:null;}catch{return null;}
+  }
+  async function findBookCover(book) {
+    const title=coverTitle(book),author=book.author||"";
+    const expected=normalize(title);
+    // Google Books offers real thumbnail URLs for matching editions.
+    try {
+      const q="intitle:"+title+(author&&!author.includes("확인 필요")?" inauthor:"+author.split(/[·,]/)[0]:"");
+      const queries=[q,"intitle:"+title];
+      for(const query of queries){
+        const data=await fetchJson("https://www.googleapis.com/books/v1/volumes?q="+encodeURIComponent(query)+"&maxResults=15&printType=books");
+        const candidates=(data.items||[]).map(item=>item.volumeInfo||{});
+        const match=candidates.find(v=>{
+          const name=normalize(v.title);
+          return expected&&name&&(name.includes(expected)||expected.includes(name))&&(v.imageLinks?.thumbnail||v.imageLinks?.smallThumbnail);
+        });
+        if(match){
+          const url=validImageUrl(match.imageLinks.thumbnail||match.imageLinks.smallThumbnail);
+          if(url)return url.replace(/([?&])zoom=\d+/, "$1zoom=1");
+        }
+      }
+    } catch(error){ /* Try a second image catalog below. */ }
+    // Open Library is an independent fallback; do not use an arbitrary unrelated cover.
+    try {
+      const response=await fetchJson("https://openlibrary.org/search.json?title="+encodeURIComponent(title)+"&limit=12&fields=title,author_name,cover_i,isbn");
+      const matched=(response.docs||[]).find(d=>{
+        const name=normalize(d.title);
+        return expected&&name&&(name.includes(expected)||expected.includes(name))&&d.cover_i;
+      });
+      if(matched?.cover_i)return "https://covers.openlibrary.org/b/id/"+matched.cover_i+"-L.jpg";
+    } catch(error){ /* Genuine cover unavailable. */ }
+    return null;
+  }
+  function getCover(book,img,container) {
+    const key=normalize(book.title+" "+book.author);
+    const urls=[];
+    const pinned=validImageUrl(book.coverUrl);
+    if(pinned)urls.push(pinned);
+    if(state.coverCache[key])urls.push(state.coverCache[key]);
+    let index=0;
+    let triedLookup=false;
+    const showNext=async()=>{
+      if(!img.isConnected)return;
+      if(index<urls.length){
+        img.src=urls[index++];
+        return;
+      }
+      if(triedLookup)return;
+      triedLookup=true;
+      if(state.coverCache[key]===false)return;
+      if(!coversPending.has(key))coversPending.set(key,findBookCover(book));
+      const discovered=await coversPending.get(key);
+      coversPending.delete(key);
+      if(!img.isConnected)return;
+      if(discovered&&!urls.includes(discovered)){
+        state.coverCache[key]=discovered;
+        urls.push(discovered);
+        showNext();
+      }else state.coverCache[key]=false;
+    };
+    img.addEventListener("error",()=>{
+      img.classList.remove("ready");
+      container.classList.remove("has-image");
+      showNext();
+    });
+    showNext();
   }
   function line(label,value) {
     const node = createNode("div","compact-field");
@@ -106,12 +166,13 @@
       const cover=createNode("a","book-cover");
       cover.href=kyoboSearch(book);cover.target="_blank";cover.rel="noopener noreferrer";cover.title=book.title+" · 교보문고에서 보기";
       const fallback=createNode("span","fallback-cover",book.title.split(/[:：]/)[0]);
+      fallback.setAttribute("aria-hidden","true");
       const img=document.createElement("img");
       img.alt=`${book.title} 표지`;
-      img.loading="lazy";
+      img.loading="eager";
+      img.decoding="async";
       img.referrerPolicy="no-referrer";
       img.addEventListener("load",()=>{img.classList.add("ready");cover.classList.add("has-image");});
-      img.addEventListener("error",()=>{img.classList.remove("ready");cover.classList.remove("has-image");});
       cover.append(fallback,img);
       card.append(cover);
       getCover(book,img,cover);

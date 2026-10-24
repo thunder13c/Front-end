@@ -33,6 +33,7 @@
   }
   async function getCover(book,img,container) {
     const key = normalize(book.title+" "+book.author);
+    if(book.coverUrl && /^https:\/\//.test(book.coverUrl)){img.src=book.coverUrl;return;}
     if (state.coverCache[key] === false) return;
     if (state.coverCache[key]) { img.src = state.coverCache[key]; return; }
     try {
@@ -79,7 +80,7 @@
   }
   function renderRecord(record, shouldScroll=true) {
     const themeIds=Array.isArray(record.themeIds)&&record.themeIds.length ? record.themeIds : [record.themeId];
-    const plan=engine.planForThemes(themeIds,state.themes,state.books);
+    const plan=engine.planForThemes(themeIds,state.themes,state.books,record.seed||0);
     if(!plan.items.length)return;
     state.current=record;
     const summary=plan.themes.map(x=>x.label).join(" + ");
@@ -98,7 +99,8 @@
         createNode("span","source-tag"+(typeof book.id === "string" ? " external":""),typeof book.id === "number" ? "클럽 보유 도서" : "외부 추천"));
       card.append(top);
       if(plan.themes.length>1)card.append(createNode("p","book-topics","연결 주제 · "+labels.join(" · ")));
-      const cover=createNode("div","book-cover");
+      const cover=createNode("a","book-cover");
+      cover.href=kyoboSearch(book);cover.target="_blank";cover.rel="noopener noreferrer";cover.title=book.title+" · 교보문고에서 보기";
       const fallback=createNode("span","fallback-cover",book.title.split(/[:：]/)[0]);
       const img=document.createElement("img");
       img.alt=`${book.title} 표지`;
@@ -187,7 +189,7 @@
       renderPresets();
       return;
     }
-    const concern=selected.map(x=>x.preset.concern).join("\n").slice(0,1200);
+    const concern=selected.map(x=>x.preset.label+" : "+x.preset.concern).join(" + ").slice(0,1200);
     $("#concern").value=concern;
     $("#count").textContent=`${concern.length} / 1200`;
     submitConcern(concern,{
@@ -234,7 +236,7 @@
     const record={
       id:options.reuseSelection&&state.activeSelectionId ? state.activeSelectionId : Date.now(),
       concern,themeId:themeIds[0],themeIds,selectedLabels:options.selectedLabels||[],
-      created:new Date().toISOString()
+      created:new Date().toISOString(),seed:Math.floor(Math.random()*4294967295)
     };
     const idx=options.reuseSelection&&state.activeSelectionId
       ? state.records.findIndex(r=>r.id===state.activeSelectionId) : -1;

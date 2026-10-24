@@ -117,3 +117,10 @@ footer{display:flex;justify-content:space-between;border-top:1px solid var(--bor
 .insight-note{font-size:10px;color:#888277;line-height:1.6;margin:10px 0}
 .insight-copy{border:1px solid #bfcfbf;background:white;border-radius:7px;padding:8px 11px;color:#36503c;font-size:11px;cursor:pointer}
 .insight-copy:hover{background:#e9f0e7}
+
+/* v5: real embedded cover artwork, with readable text placeholder only if both providers fail */
+.book-cover{display:flex;align-items:center;justify-content:center;text-decoration:none;isolation:isolate;min-width:133px;min-height:183px}
+.book-cover img{display:block;width:100%;height:100%;object-fit:contain;opacity:0;z-index:1;background:#f9f7f2}
+.book-cover.has-image img,.book-cover img.ready{opacity:1}
+.book-cover:hover{outline:2px solid #967d61;outline-offset:3px}
+.book-cover .fallback-cover{position:relative;z-index:0;max-width:100%;font-size:16px;overflow-wrap:anywhere}

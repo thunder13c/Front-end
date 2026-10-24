@@ -52,3 +52,10 @@ Vercel에서 `thunder13c/Front-end`를 연동하고 프로젝트 Root Directory�
 - 사용자 지정 HTTPS book.coverUrl → Google Books 표지 → Open Library 표지를 순서대로 검색해 표시합니다.
 - 외부 서비스에 표지가 없거나 접속 실패 시에는 제목이 들어간 대체 표지로 돌아갑니다. 모든 책의 실제 이미지 확보를 보장하지는 않습니다.
 - 표지를 클릭하면 교보문고 검색 페이지로 이동합니다.
+
+## v6 교보문고 표지 표시 오류 수정
+- 이미지가 아직 DOM에 부착되지 않았다는 이유로 최초 로딩을 중단하던 코드 제거.
+- 확인된 판본 ISBN과 교보문고 `contents.kyobobook.co.kr` 표지 CDN 주소를 `kyobo-covers.json`으로 관리.
+- 교보문고 CDN 이미지 2가지 경로를 먼저 시도하며, 실패 시 Google Books 및 Open Library로 대체.
+- 각 표지는 실제 `<img>` 요소로 표시, 클릭하면 교보문고 검색 페이지로 이동.
+- ISBN이 등록되지 않은 도서는 기존 Google Books/Open Library 검색을 이용함. 특정 판본의 표지 확인이 불완전하거나 외부 CDN이 막히면 대체 표시될 수 있음.

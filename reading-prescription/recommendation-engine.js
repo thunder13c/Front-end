@@ -159,6 +159,13 @@
       let score=tagScore*120+matches.length*30+Math.min(45,randomUnit(seed,String(book.id))*50);
       if(typeof book.id==="number")score+=12;
       if(insights[String(book.id)])score+=9;
+      // Favor manually authored prescriptions over broad topic-only inferences.
+      const authoredHits=themes.filter(t=>matches.includes(t.id)&&t.recommend.some(p=>String(p[0])===String(book.id)));
+      score+=authoredHits.length*115;
+      // Distinctive cross-topic matches answer compound concerns more precisely.
+      if(matches.includes("dream")&&matches.includes("art"))score+=65;
+      if(matches.includes("dream")&&matches.includes("career"))score+=55;
+      if(book.id==="e25"&&matches.includes("dream"))score+=85;
       if(normal(concern).includes(normal(display)))score+=180;
       const uniqueKey=normal(display).replace(/vol[0-9]+$/,"");
       candidates.push({book,tags,matches,score,uniqueKey});

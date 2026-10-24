@@ -131,10 +131,11 @@
       const valid=validImageUrl(url);
       if(valid&&!seen.has(valid)){seen.add(valid);urls.push(valid);}
     };
-    add(state.coverCache[key]);
     add(book.coverUrl);
     const metadata=state.kyoboCovers[String(book.id)];
     kyoboCoverCandidates(metadata?.isbn).forEach(add);
+    (metadata?.alternateIsbns||[]).forEach(isbn=>kyoboCoverCandidates(isbn).forEach(add));
+    add(state.coverCache[key]);
     let index=0,lookupStarted=false;
     function showNext(){
       if(index<urls.length){

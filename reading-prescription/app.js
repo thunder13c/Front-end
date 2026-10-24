@@ -5,7 +5,7 @@
   const PRESETS_KEY = "reading-prescription-presets-v2";
   const builtInPresets = [{label:"번아웃",concern:"요즘 일에 지치고 매일 반복되는 일상이 무의미하게 느껴져요.",themeId:"burnout"},{label:"미래·진로",concern:"앞으로의 미래가 막막하고 직장을 계속 다녀야 할지 모르겠어요.",themeId:"future"},{label:"자존감",concern:"자꾸 다른 사람과 비교하게 되고 자신감이 떨어져요.",themeId:"esteem"},{label:"인간관계",concern:"사람들과 관계를 맺는 게 어렵고 자주 상처받아요.",themeId:"relationships"},{label:"선택과 집중",concern:"관심사가 너무 많고 하고 싶은 일이 많아서 무엇에 집중해야 할지 모르겠어요.",themeId:"focus"},{label:"돈과 미래",concern:"경제적으로 불안하고 미래 계획을 어떻게 해야 할지 고민이에요.",themeId:"money"},{label:"이별",concern:"소중한 사람과 헤어져서 마음을 어떻게 정리해야 할지 모르겠어요.",themeId:"breakup"},{label:"나를 찾기",concern:"내가 어떤 삶을 원하는지, 정말 좋아하는 일이 뭔지 모르겠어요.",themeId:"identity"},{label:"실패·재도전",concern:"실패 후 다시 시작하는 것이 두렵고 용기가 나지 않아요.",themeId:"failure"},{label:"가족",concern:"가족과 생각이 달라서 이해하고 대화하는 방법이 고민이에요.",themeId:"family"},{label:"외로움",concern:"혼자라고 느껴져서 외롭고 사람들과 연결되고 싶어요.",themeId:"lonely"},{label:"일과 삶의 균형",concern:"회사 일에 매달리다 보니 나를 위한 시간이 없고 균형을 찾고 싶어요.",themeId:"burnout"}];
   const $ = sel => document.querySelector(sel);
-  const state = {catalog: [], external: [], themes: [], books: new Map(), records: [], current: null, coverCache: {}, kyoboCovers: {}, insights: {}, presets: [], editingPresetId: null, selectedPresetKeys: [], activeSelectionId: null};
+  const state = {catalog: [], external: [], themes: [], books: new Map(), records: [], current: null, coverCache: {}, kyoboCovers: {}, bookTopics: {}, insights: {}, presets: [], editingPresetId: null, selectedPresetKeys: [], activeSelectionId: null};
   function toast(message) {
     const el = $("#toast");
     el.textContent = message;
@@ -204,14 +204,16 @@
   }
   function renderRecord(record, shouldScroll=true) {
     const themeIds=Array.isArray(record.themeIds)&&record.themeIds.length ? record.themeIds : [record.themeId];
-    const plan=engine.planForThemes(themeIds,state.themes,state.books,record.seed||0);
+    const plan=record.engineVersion===2
+      ? engine.planForCatalog(record.concern,themeIds,state.themes,state.books,state.bookTopics,state.insights,record.seed||0)
+      : engine.planForCatalog(record.concern,themeIds,state.themes,state.books,state.bookTopics,state.insights,record.seed||0);
     if(!plan.items.length)return;
     state.current=record;
     const summary=plan.themes.map(x=>x.label).join(" + ");
-    const more=(record.selectedLabels?.length||0)>3 ? " · 여러 키워드 중 상위 3개 주제 반영" : "";
+    const more=(record.selectedLabels?.length||0)>3 ? " · 여러 키워드 중 중요한 주제 반영" : "";
     $("#match-description").textContent=plan.themes.length>1
-      ? `복합 고민 처방 · ${summary}${more} · ${plan.items.length}권 추천`
-      : `${summary}을(를) 중심으로 골랐습니다 · ${plan.items.length}권 추천`;
+      ? `의미 기반 복합 고민 · ${summary}${more} · 전체 도서에서 ${plan.items.length}권 추천`
+      : `${summary} 중심으로 전체 도서에서 ${plan.items.length}권 추천`;
     const grid = $("#prescription-grid");
     grid.replaceChildren();
     plan.items.forEach(({part,labels},index)=>{
@@ -382,10 +384,10 @@
   }
   function submitConcern(concern, options={}) {
     if(concern.length<5){toast("고민을 조금 더 자세히 적어주세요.");return;}
-    const themeIds=resolveThemes(concern,options.forcedIds||[]);
+    const themeIds=engine.scoreIntent(concern,state.themes,options.forcedIds||[]).map(x=>x.id);
     const record={
       id:options.reuseSelection&&state.activeSelectionId ? state.activeSelectionId : Date.now(),
-      concern,themeId:themeIds[0],themeIds,selectedLabels:options.selectedLabels||[],
+      concern,themeId:themeIds[0]||"future",themeIds,engineVersion:2,selectedLabels:options.selectedLabels||[],
       created:new Date().toISOString(),seed:Math.floor(Math.random()*4294967295)
     };
     const idx=options.reuseSelection&&state.activeSelectionId
@@ -404,12 +406,13 @@
   }
   async function init(){
     try {
-      const [catalog,external,themes,insights,kyoboCovers]=await Promise.all(["catalog.json","extended.json","themes.json","book-insights.json","kyobo-covers.json"].map(file=>
+      const [catalog,external,themes,insights,kyoboCovers,bookTopics]=await Promise.all(["catalog.json","extended.json","themes.json","book-insights.json","kyobo-covers.json","book-topics.json"].map(file=>
         fetch(DATA_BASE+file).then(response=>{if(!response.ok)throw Error(file);return response.json();})
       ));
       state.catalog=catalog;state.external=external;state.themes=themes;
       state.insights=insights && typeof insights==="object"&&!Array.isArray(insights)?insights:{};
       state.kyoboCovers=kyoboCovers && typeof kyoboCovers==="object"&&!Array.isArray(kyoboCovers)?kyoboCovers:{};
+      state.bookTopics=bookTopics?.books||{};
       [...catalog,...external].forEach(book=>state.books.set(String(book.id),book));
       setupPresetManager();
       state.records=safeReadHistory();

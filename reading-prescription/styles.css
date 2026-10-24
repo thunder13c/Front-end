@@ -101,3 +101,19 @@ footer{display:flex;justify-content:space-between;border-top:1px solid var(--bor
 .preset-chip:focus-visible,.quick-prompts button:focus-visible{outline:2px solid #244d3a;outline-offset:3px}
 .book-topics{font-size:11px;font-weight:600;line-height:1.55;color:#586d58;background:#f0f4ec;border-radius:7px;padding:6px 9px;margin:10px 0 8px}
 @media(max-width:650px){.selection-toolbar{flex-wrap:wrap;gap:6px}.book-topics{font-size:11px}}
+
+/* v4 — optional book synopses and contrasting reader perspectives */
+.book-insights{margin-top:18px;border:1px solid #e4dccf;border-radius:10px;background:#fbf9f4;overflow:hidden}
+.insight-toggle{cursor:pointer;list-style-position:inside;padding:11px 12px;font-weight:700;font-size:12px;color:#486251;line-height:1.5}
+.insight-toggle::marker{color:#486251}
+.book-insights[open] .insight-toggle{border-bottom:1px solid #e8e1d6;background:#f4f0e8}
+.insight-body{padding:12px 13px 15px}
+.insight-subtitle{margin:4px 0 7px;font-size:12px;font-weight:700;color:#2c3b2f}
+.insight-summary{font-size:12px;color:#4b4b45;line-height:1.75;margin:0 0 13px;word-break:keep-all}
+.perspective-list{margin:0 0 8px;padding:0;list-style:none;display:grid;gap:7px}
+.perspective-item{display:flex;gap:7px;flex-direction:column;border-left:2px solid #d2dfcf;padding:3px 0 3px 9px;font-size:12px;line-height:1.6}
+.perspective-item strong{font-size:11px;color:#47604c}
+.perspective-item span{color:#56574f;word-break:keep-all}
+.insight-note{font-size:10px;color:#888277;line-height:1.6;margin:10px 0}
+.insight-copy{border:1px solid #bfcfbf;background:white;border-radius:7px;padding:8px 11px;color:#36503c;font-size:11px;cursor:pointer}
+.insight-copy:hover{background:#e9f0e7}

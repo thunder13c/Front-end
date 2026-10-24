@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="theme-color" content="#f8f4ed"/>
-  <meta name="description" content="고민을 적으면 독서클럽 보유도서와 고전에서 3권을 골라 한 줄 독서 처방전을 제공합니다."/>
+  <meta name="description" content="여러 고민과 키워드를 함께 분석해 독서클럽과 고전에서 맞춤 도서 3권을 추천합니다."/>
   <title>책의 처방 | 독서 처방전</title>
   <link rel="stylesheet" href="/styles.css"/>
 </head>
@@ -26,13 +26,14 @@
       <section class="consult card" aria-labelledby="consult-title">
         <div class="section-top"><div><p class="eyebrow">01 / TELL YOUR STORY</p><h2 id="consult-title">어떤 고민을 안고 계신가요?</h2></div><span class="quiet-label">상담자의 실명은 입력하지 마세요.</span></div>
         <form id="prescription-form">
-          <label class="sr-only" for="concern">고민 내용</label>
+          <label class="sr-only" for="concern">고민 내용 (여러 키워드 조합 가능)</label>
           <textarea id="concern" maxlength="1200" minlength="5" rows="5" required placeholder="예) 30대 직장인인데 앞으로 미래를 어떻게 해야 할지 모르겠어요. 지금 일을 계속하는 게 맞는지도 고민이에요."></textarea>
           <div class="form-bottom"><span id="count">0 / 1200</span><button class="primary-button" type="submit">독서 처방 받기 <span aria-hidden="true">↗</span></button></div>
         </form>
         <div class="quick-prompts"><span>이런 고민도 좋아요</span><button type="button" data-example="요즘 일에 지치고 매일 반복되는 일상이 무의미하게 느껴져요.">번아웃</button><button type="button" data-example="앞으로의 미래가 막막하고 직장을 계속 다녀야 할지 모르겠어요.">미래·진로</button><button type="button" data-example="자꾸 다른 사람과 비교하게 되고 자신감이 떨어져요.">자존감</button><button type="button" data-example="사람들과 관계를 맺는 게 어렵고 자주 상처받아요.">인간관계</button></div>
         <section class="preset-manager" aria-labelledby="preset-title">
-          <div class="preset-heading"><div><p class="eyebrow">MY CONCERNS & KEYWORDS</p><h3 id="preset-title">나만의 고민·키워드</h3><p class="manager-hint">버튼을 누르면 고민이 입력되고 즉시 3권을 추천합니다. 기본 버튼도 바로 추천됩니다.</p></div><button type="button" class="ghost-button" id="toggle-manager" aria-expanded="false">키워드 추가·관리 ＋</button></div>
+          <div class="preset-heading"><div><p class="eyebrow">MY CONCERNS & KEYWORDS</p><h3 id="preset-title">나만의 고민·키워드</h3><p class="manager-hint">키워드를 하나씩 누르거나 여러 개 선택해 조합하세요. 누를 때마다 3권의 추천이 갱신됩니다.</p></div><button type="button" class="ghost-button" id="toggle-manager" aria-expanded="false">키워드 추가·관리 ＋</button></div>
+          <div class="selection-toolbar" aria-live="polite"><span id="selected-count">키워드를 여러 개 눌러 고민을 조합할 수 있어요.</span><button id="clear-selected" type="button" class="text-button" hidden>선택 초기화</button></div>
           <div id="custom-prompts" class="preset-buttons"></div>
           <div id="manager-form" hidden>
             <form id="preset-form" class="preset-form">
@@ -48,7 +49,7 @@
         </section>
       </section>
       <section id="results" class="results" hidden aria-live="polite">
-        <div class="results-heading"><div><p class="eyebrow">02 / YOUR PRESCRIPTION</p><h2>마음에 건네는 세 권의 책</h2><p id="match-description" class="match-description"></p></div><button type="button" class="ghost-button" id="copy-all">처방전 전체 복사 <span>⧉</span></button></div>
+        <div class="results-heading"><div><p class="eyebrow">02 / YOUR COMBINED PRESCRIPTION</p><h2>마음에 건네는 세 권의 책</h2><p id="match-description" class="match-description"></p></div><button type="button" class="ghost-button" id="copy-all">처방전 전체 복사 <span>⧉</span></button></div>
         <div id="prescription-grid" class="prescription-grid"></div>
         <p class="footnote">※ 책은 전문적 상담이나 치료를 대신하지 않습니다. 표지는 Google Books에서 검색하며, 일치하는 판본이 없으면 기본 이미지로 표시됩니다. 교보문고 버튼은 도서 검색 결과로 연결됩니다.</p>
       </section>
@@ -58,6 +59,7 @@
     <footer><span>책의 처방 · 독서 처방전</span><span>독서클럽 도서목록 2026.03.11 기준 · 참고용 도서 추천</span></footer>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
+  <script defer src="/recommendation-engine.js"></script>
   <script defer src="/app.js"></script>
 </body>
 </html>

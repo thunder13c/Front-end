@@ -94,7 +94,7 @@
     let index=0;
     let triedLookup=false;
     const showNext=async()=>{
-      if(!img.isConnected)return;
+      // Loading can begin before the card is attached to the DOM.
       if(index<urls.length){
         img.src=urls[index++];
         return;
@@ -105,7 +105,7 @@
       if(!coversPending.has(key))coversPending.set(key,findBookCover(book));
       const discovered=await coversPending.get(key);
       coversPending.delete(key);
-      if(!img.isConnected)return;
+      // Loading can begin before the card is attached to the DOM.
       if(discovered&&!urls.includes(discovered)){
         state.coverCache[key]=discovered;
         urls.push(discovered);

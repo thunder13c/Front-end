@@ -31,14 +31,16 @@
     if (content !== undefined) node.textContent = content;
     return node;
   }
+  // Cover data is sourced from ISBN-linked Kyobo images, Google Books, or Open Library.
+  // Any genuine edition of the correct work is acceptable; missing images never stop the next candidate.
   const coversPending=new Map();
   async function fetchJson(url) {
     const ctl=new AbortController();
     const timer=setTimeout(()=>ctl.abort(),8000);
     try {
-      const res=await fetch(url,{signal:ctl.signal,headers:{Accept:"application/json"}});
-      if(!res.ok)throw Error("cover API "+res.status);
-      return await res.json();
+      const response=await fetch(url,{signal:ctl.signal,headers:{Accept:"application/json"}});
+      if(!response.ok)throw Error("Cover catalogue "+response.status);
+      return await response.json();
     } finally {clearTimeout(timer);}
   }
   function coverTitle(book) {
@@ -46,72 +48,123 @@
   }
   function validImageUrl(url) {
     if(typeof url!=="string")return null;
-    try {const u=new URL(url.replace(/^http:/,"https:"));return u.protocol==="https:"?u.href:null;}catch{return null;}
+    try{
+      const parsed=new URL(url.replace(/^http:/,"https:"));
+      return parsed.protocol==="https:"?parsed.href:null;
+    }catch{return null;}
   }
-  async function findBookCover(book) {
-    const title=coverTitle(book),author=book.author||"";
-    const expected=normalize(title);
-    // Google Books offers real thumbnail URLs for matching editions.
-    try {
-      const q="intitle:"+title+(author&&!author.includes("확인 필요")?" inauthor:"+author.split(/[·,]/)[0]:"");
-      const queries=[q,"intitle:"+title];
-      for(const query of queries){
-        const data=await fetchJson("https://www.googleapis.com/books/v1/volumes?q="+encodeURIComponent(query)+"&maxResults=15&printType=books");
-        const candidates=(data.items||[]).map(item=>item.volumeInfo||{});
-        const match=candidates.find(v=>{
+  function kyoboCoverCandidates(isbn) {
+    const digits=String(isbn||"").replace(/[^0-9]/g,"");
+    if(!/^97[89]\d{10}$/.test(digits))return [];
+    return [
+      "https://contents.kyobobook.co.kr/sih/fit-in/300x0/pdt/"+digits+".jpg",
+      "https://contents.kyobobook.co.kr/pdt/"+digits+".jpg"
+    ];
+  }
+  function titleMatches(candidate,expected) {
+    const c=normalize(candidate),e=normalize(expected);
+    if(!c||!e)return false;
+    if(e.length<=3)return c===e;
+    return c.includes(e)||e.includes(c);
+  }
+  function coverSourceCandidates(book) {
+    const originalTitle=coverTitle(book),originalAuthor=book.author||"";
+    const output=[],seen=new Set();
+    const add=url=>{
+      const item=validImageUrl(url);
+      if(item&&!seen.has(item)){seen.add(item);output.push(item);}
+    };
+    const author=normalize(originalAuthor.split(/[·,]/)[0]);
+    function prioritize(items,authorFn){
+      return items.slice().sort((a,b)=>{
+        function points(v) {
           const name=normalize(v.title);
-          return expected&&name&&(name.includes(expected)||expected.includes(name))&&(v.imageLinks?.thumbnail||v.imageLinks?.smallThumbnail);
-        });
-        if(match){
-          const url=validImageUrl(match.imageLinks.thumbnail||match.imageLinks.smallThumbnail);
-          if(url)return url.replace(/([?&])zoom=\d+/, "$1zoom=1");
+          const title=normalize(originalTitle);
+          return (name===title?6:3)+(author&&normalize(authorFn(v)).includes(author)?3:0);
         }
-      }
-    } catch(error){ /* Try a second image catalog below. */ }
-    // Open Library is an independent fallback; do not use an arbitrary unrelated cover.
-    try {
-      const response=await fetchJson("https://openlibrary.org/search.json?title="+encodeURIComponent(title)+"&limit=12&fields=title,author_name,cover_i,isbn");
-      const matched=(response.docs||[]).find(d=>{
-        const name=normalize(d.title);
-        return expected&&name&&(name.includes(expected)||expected.includes(name))&&d.cover_i;
+        return points(b)-points(a);
       });
-      if(matched?.cover_i)return "https://covers.openlibrary.org/b/id/"+matched.cover_i+"-L.jpg";
-    } catch(error){ /* Genuine cover unavailable. */ }
-    return null;
+    }
+    return {originalTitle,originalAuthor,add,output,prioritize};
+  }
+  async function findBookCoverCandidates(book) {
+    const helper=coverSourceCandidates(book);
+    const title=helper.originalTitle,author=helper.originalAuthor;
+    // Parallel catalog requests keep the UI responsive when a service is slow.
+    const googleStrict="intitle:"+title+(author&&!author.includes("확인 필요")?" inauthor:"+author.split(/[·,]/)[0]:"");
+    const requests=[
+      fetchJson("https://www.googleapis.com/books/v1/volumes?q="+encodeURIComponent(googleStrict)+"&maxResults=12&printType=books"),
+      fetchJson("https://www.googleapis.com/books/v1/volumes?q="+encodeURIComponent("intitle:"+title)+"&maxResults=15&printType=books"),
+      fetchJson("https://openlibrary.org/search.json?title="+encodeURIComponent(title)+"&limit=12&fields=title,author_name,cover_i,isbn")
+    ];
+    const responses=await Promise.allSettled(requests);
+    for(let i=0;i<2;i++){
+      if(responses[i].status!=="fulfilled")continue;
+      const matched=helper.prioritize(
+        (responses[i].value.items||[]).map(x=>x.volumeInfo||{}).filter(x=>titleMatches(x.title,title)),
+        x=>(x.authors||[]).join(" ")
+      );
+      for(const info of matched.slice(0,7)){
+        // Prefer the working Google thumbnail, then try the ISBN as a Kyobo cover.
+        helper.add(info.imageLinks?.thumbnail||info.imageLinks?.smallThumbnail);
+        const isbn13=(info.industryIdentifiers||[]).find(x=>x.type==="ISBN_13")?.identifier;
+        kyoboCoverCandidates(isbn13).forEach(helper.add);
+      }
+    }
+    if(responses[2].status==="fulfilled"){
+      const candidates=helper.prioritize(
+        (responses[2].value.docs||[]).filter(x=>x.cover_i&&titleMatches(x.title,title)),
+        x=>(x.author_name||[]).join(" ")
+      );
+      for(const doc of candidates.slice(0,5)){
+        helper.add("https://covers.openlibrary.org/b/id/"+doc.cover_i+"-M.jpg?default=false");
+        const isbn13=(doc.isbn||[]).find(x=>/^97[89]\d{10}$/.test(x));
+        kyoboCoverCandidates(isbn13).forEach(helper.add);
+      }
+    }
+    return helper.output.slice(0,24);
   }
   function getCover(book,img,container) {
     const key=normalize(book.title+" "+book.author);
-    const urls=[];
+    const urls=[],seen=new Set();
+    const add=url=>{
+      const valid=validImageUrl(url);
+      if(valid&&!seen.has(valid)){seen.add(valid);urls.push(valid);}
+    };
+    add(state.coverCache[key]);
+    add(book.coverUrl);
     const metadata=state.kyoboCovers[String(book.id)];
-    const isbn=metadata?.isbn;
-    if(isbn && /^97[89]\d{10}$/.test(isbn)){
-      urls.push("https://contents.kyobobook.co.kr/sih/fit-in/300x0/pdt/"+isbn+".jpg");
-      urls.push("https://contents.kyobobook.co.kr/pdt/"+isbn+".jpg");
-    }
-    const pinned=validImageUrl(book.coverUrl);
-    if(pinned)urls.push(pinned);
-    if(state.coverCache[key] && !urls.includes(state.coverCache[key]))urls.push(state.coverCache[key]);
-    let index=0;
-    let triedLookup=false;
-    const showNext=async()=>{
-      // Loading can begin before the card is attached to the DOM.
+    kyoboCoverCandidates(metadata?.isbn).forEach(add);
+    let index=0,lookupStarted=false;
+    function showNext(){
       if(index<urls.length){
         img.src=urls[index++];
         return;
       }
-      if(triedLookup)return;
-      triedLookup=true;
-      if(state.coverCache[key]===false)return;
-      if(!coversPending.has(key))coversPending.set(key,findBookCover(book));
-      const discovered=await coversPending.get(key);
-      coversPending.delete(key);
-      // Loading can begin before the card is attached to the DOM.
-      if(discovered&&!urls.includes(discovered)){
-        state.coverCache[key]=discovered;
-        urls.push(discovered);
-        showNext();
-      }else state.coverCache[key]=false;
-    };
+      if(lookupStarted)return;
+      lookupStarted=true;
+      if(!coversPending.has(key)){
+        coversPending.set(key,findBookCoverCandidates(book).catch(()=>[]));
+      }
+      const pending=coversPending.get(key);
+      pending.then(found=>{
+        if(coversPending.get(key)===pending)coversPending.delete(key);
+        found.forEach(add);
+        if(index<urls.length)showNext();
+        else{
+          state.coverCache[key]=false;
+          container.classList.add("cover-unavailable");
+        }
+      });
+    }
+    img.addEventListener("load",()=>{
+      if(img.naturalWidth>0){
+        state.coverCache[key]=img.currentSrc||img.src;
+        img.classList.add("ready");
+        container.classList.add("has-image");
+        container.classList.remove("cover-unavailable");
+      }else showNext();
+    });
     img.addEventListener("error",()=>{
       img.classList.remove("ready");
       container.classList.remove("has-image");
@@ -178,7 +231,7 @@
       img.loading="eager";
       img.decoding="async";
       img.referrerPolicy="no-referrer";
-      img.addEventListener("load",()=>{img.classList.add("ready");cover.classList.add("has-image");});
+      // The cover loader manages load/error events and retries alternate editions.
       cover.append(fallback,img);
       card.append(cover);
       getCover(book,img,cover);

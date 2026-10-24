@@ -5,7 +5,7 @@
   const PRESETS_KEY = "reading-prescription-presets-v2";
   const builtInPresets = [{label:"번아웃",concern:"요즘 일에 지치고 매일 반복되는 일상이 무의미하게 느껴져요.",themeId:"burnout"},{label:"미래·진로",concern:"앞으로의 미래가 막막하고 직장을 계속 다녀야 할지 모르겠어요.",themeId:"future"},{label:"자존감",concern:"자꾸 다른 사람과 비교하게 되고 자신감이 떨어져요.",themeId:"esteem"},{label:"인간관계",concern:"사람들과 관계를 맺는 게 어렵고 자주 상처받아요.",themeId:"relationships"},{label:"선택과 집중",concern:"관심사가 너무 많고 하고 싶은 일이 많아서 무엇에 집중해야 할지 모르겠어요.",themeId:"focus"},{label:"돈과 미래",concern:"경제적으로 불안하고 미래 계획을 어떻게 해야 할지 고민이에요.",themeId:"money"},{label:"이별",concern:"소중한 사람과 헤어져서 마음을 어떻게 정리해야 할지 모르겠어요.",themeId:"breakup"},{label:"나를 찾기",concern:"내가 어떤 삶을 원하는지, 정말 좋아하는 일이 뭔지 모르겠어요.",themeId:"identity"},{label:"실패·재도전",concern:"실패 후 다시 시작하는 것이 두렵고 용기가 나지 않아요.",themeId:"failure"},{label:"가족",concern:"가족과 생각이 달라서 이해하고 대화하는 방법이 고민이에요.",themeId:"family"},{label:"외로움",concern:"혼자라고 느껴져서 외롭고 사람들과 연결되고 싶어요.",themeId:"lonely"},{label:"일과 삶의 균형",concern:"회사 일에 매달리다 보니 나를 위한 시간이 없고 균형을 찾고 싶어요.",themeId:"burnout"}];
   const $ = sel => document.querySelector(sel);
-  const state = {catalog: [], external: [], themes: [], books: new Map(), records: [], current: null, coverCache: {}, presets: [], editingPresetId: null, selectedPresetKeys: [], activeSelectionId: null};
+  const state = {catalog: [], external: [], themes: [], books: new Map(), records: [], current: null, coverCache: {}, insights: {}, presets: [], editingPresetId: null, selectedPresetKeys: [], activeSelectionId: null};
   function toast(message) {
     const el = $("#toast");
     el.textContent = message;
@@ -58,11 +58,15 @@
     node.append(createNode("strong",null,label),createNode("span",null,oneLine(value)));
     return node;
   }
-  function copyText(part) {
+  function copyText(part,detailed=false) {
     const book = getBook(part[0]);
     if (!book) return "";
     const source = typeof book.id === "number" ? "독서클럽 보유" : "외부 추천";
-    return `${book.title} | ${book.author} (${source})\n추천 이유: ${part[1]}\n한 줄 처방: ${part[2]}\n복용법: ${part[3]}\n교보문고 검색: ${kyoboSearch(book)}`;
+    const basic=`${book.title} | ${book.author} (${source})\n추천 이유: ${part[1]}\n한 줄 처방: ${part[2]}\n복용법: ${part[3]}\n교보문고 검색: ${kyoboSearch(book)}`;
+    const insight=state.insights[String(book.id)];
+    if(!detailed||!insight)return basic;
+    const meaning=insight.type==="novel"?"줄거리":insight.type==="poetry"?"시집 소개":"핵심 내용";
+    return basic+"\n"+meaning+": "+insight.summary+"\n생각해 볼 관점:\n"+insight.perspectives.map((p,i)=>"  "+(i+1)+". "+p).join("\n");
   }
   async function copy(value) {
     try {
@@ -115,6 +119,31 @@
       const fields=createNode("div","compact-fields");
       fields.append(line("추천 이유",part[1]),line("한 줄 처방",part[2]),line("복용법",part[3]));
       card.append(fields);
+      const insight=state.insights[String(book.id)];
+      if(insight){
+        const details=createNode("details","book-insights");
+        const summary=createNode("summary","insight-toggle","책의 내용 · 다양한 독서 관점 펼치기");
+        details.append(summary);
+        const body=createNode("div","insight-body");
+        const heading=insight.type==="novel"?"줄거리":insight.type==="poetry"?"시집 소개":"핵심 내용";
+        body.append(createNode("h4","insight-subtitle",heading),createNode("p","insight-summary",insight.summary));
+        body.append(createNode("h4","insight-subtitle","이 책을 다르게 읽는 3가지 관점"));
+        const perspectives=createNode("ol","perspective-list");
+        ["공감하며 읽기","다시 질문하기","내 삶에 적용하기"].forEach((label,i)=>{
+          const item=createNode("li","perspective-item");
+          item.append(createNode("strong",null,label),createNode("span",null,insight.perspectives[i]));
+          perspectives.append(item);
+        });
+        body.append(perspectives);
+        const note=createNode("p","insight-note","※ 실제 독자 리뷰나 책의 직접 인용이 아닌, 독서 상담을 위한 해석 예시입니다.");
+        body.append(note);
+        const detailedCopy=createNode("button","insight-copy","상세 처방 복사 ⧉");
+        detailedCopy.type="button";
+        detailedCopy.addEventListener("click",()=>copy(copyText(part,true)));
+        body.append(detailedCopy);
+        details.append(body);
+        card.append(details);
+      }
       const actions=createNode("div","card-actions");
       const link=createNode("a",null,"교보문고 검색 ↗");
       link.href=kyoboSearch(book);
@@ -254,10 +283,11 @@
   }
   async function init(){
     try {
-      const [catalog,external,themes]=await Promise.all(["catalog.json","extended.json","themes.json"].map(file=>
+      const [catalog,external,themes,insights]=await Promise.all(["catalog.json","extended.json","themes.json","book-insights.json"].map(file=>
         fetch(DATA_BASE+file).then(response=>{if(!response.ok)throw Error(file);return response.json();})
       ));
       state.catalog=catalog;state.external=external;state.themes=themes;
+      state.insights=insights && typeof insights==="object"&&!Array.isArray(insights)?insights:{};
       [...catalog,...external].forEach(book=>state.books.set(String(book.id),book));
       setupPresetManager();
       state.records=safeReadHistory();

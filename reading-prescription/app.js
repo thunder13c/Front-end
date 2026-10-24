@@ -2,8 +2,10 @@
   "use strict";
   const DATA_BASE = "/";
   const HISTORY_KEY = "reading-prescription-history-v1";
+  const PRESETS_KEY = "reading-prescription-presets-v2";
+  const builtInPresets = [{label:"번아웃",concern:"요즘 일에 지치고 매일 반복되는 일상이 무의미하게 느껴져요.",themeId:"burnout"},{label:"미래·진로",concern:"앞으로의 미래가 막막하고 직장을 계속 다녀야 할지 모르겠어요.",themeId:"future"},{label:"자존감",concern:"자꾸 다른 사람과 비교하게 되고 자신감이 떨어져요.",themeId:"esteem"},{label:"인간관계",concern:"사람들과 관계를 맺는 게 어렵고 자주 상처받아요.",themeId:"relationships"},{label:"선택과 집중",concern:"관심사가 너무 많고 하고 싶은 일이 많아서 무엇에 집중해야 할지 모르겠어요.",themeId:"focus"},{label:"돈과 미래",concern:"경제적으로 불안하고 미래 계획을 어떻게 해야 할지 고민이에요.",themeId:"money"},{label:"이별",concern:"소중한 사람과 헤어져서 마음을 어떻게 정리해야 할지 모르겠어요.",themeId:"breakup"},{label:"나를 찾기",concern:"내가 어떤 삶을 원하는지, 정말 좋아하는 일이 뭔지 모르겠어요.",themeId:"identity"},{label:"실패·재도전",concern:"실패 후 다시 시작하는 것이 두렵고 용기가 나지 않아요.",themeId:"failure"},{label:"가족",concern:"가족과 생각이 달라서 이해하고 대화하는 방법이 고민이에요.",themeId:"family"},{label:"외로움",concern:"혼자라고 느껴져서 외롭고 사람들과 연결되고 싶어요.",themeId:"lonely"},{label:"일과 삶의 균형",concern:"회사 일에 매달리다 보니 나를 위한 시간이 없고 균형을 찾고 싶어요.",themeId:"burnout"}];
   const $ = sel => document.querySelector(sel);
-  const state = {catalog: [], external: [], themes: [], books: new Map(), records: [], current: null, coverCache: {}};
+  const state = {catalog: [], external: [], themes: [], books: new Map(), records: [], current: null, coverCache: {}, presets: [], editingPresetId: null};
   function toast(message) {
     const el = $("#toast");
     el.textContent = message;
@@ -162,17 +164,29 @@
       list.append(item);
     });
   }
+  function readPresets(){try{const v=JSON.parse(localStorage.getItem(PRESETS_KEY)||"[]");return Array.isArray(v)?v.filter(x=>x&&typeof x.label==="string"&&typeof x.concern==="string"&&typeof x.themeId==="string"&&x.concern.length>=5&&state.themes.some(t=>t.id===x.themeId)).slice(0,100).map(x=>({id:String(x.id||Date.now()),label:x.label.slice(0,28),concern:x.concern.slice(0,600),themeId:x.themeId})):[];}catch{return [];}}
+  function storePresets(){try{localStorage.setItem(PRESETS_KEY,JSON.stringify(state.presets));return true;}catch{toast("저장 공간에 접근할 수 없습니다.");return false;}}
+  function usePreset(preset){$("#concern").value=preset.concern;$("#count").textContent=`${preset.concern.length} / 1200`;submitConcern(preset.concern,preset.themeId);}
+  function renderPresets(){
+    const grid=$("#custom-prompts"),list=$("#preset-list");grid.replaceChildren();list.replaceChildren();
+    [...builtInPresets,...state.presets].forEach((item,i)=>{const button=createNode("button",i<builtInPresets.length?"preset-chip":"preset-chip custom-chip",item.label);button.type="button";button.title=item.concern;button.addEventListener("click",()=>usePreset(item));grid.append(button);});
+    state.presets.forEach(item=>{const li=createNode("li","preset-row");const info=createNode("div","preset-info");info.append(createNode("strong",null,item.label),createNode("small",null,item.concern));const actions=createNode("div","preset-row-actions");const edit=createNode("button",null,"수정");edit.type="button";edit.onclick=()=>{state.editingPresetId=item.id;$("#preset-label").value=item.label;$("#preset-concern").value=item.concern;$("#preset-theme").value=item.themeId;$("#save-preset").textContent="수정 저장";$("#cancel-edit").hidden=false;$("#preset-label").focus();};const del=createNode("button",null,"삭제");del.type="button";del.onclick=()=>{if(confirm("이 키워드를 삭제할까요?")){state.presets=state.presets.filter(x=>x.id!==item.id);storePresets();renderPresets();}};actions.append(edit,del);li.append(info,actions);list.append(li);});
+  }
+  function resetPresetForm(){$("#preset-form").reset();state.editingPresetId=null;$("#save-preset").textContent="키워드 저장";$("#cancel-edit").hidden=true;}
+  function setupPresetManager(){
+    $("#preset-theme").replaceChildren();state.themes.forEach(t=>{const op=createNode("option",null,t.label);op.value=t.id;$("#preset-theme").append(op);});
+    state.presets=readPresets();renderPresets();
+    $("#toggle-manager").onclick=()=>{const panel=$("#manager-form");panel.hidden=!panel.hidden;$("#toggle-manager").setAttribute("aria-expanded",String(!panel.hidden));};
+    $("#cancel-edit").onclick=resetPresetForm;
+    $("#preset-form").addEventListener("submit",e=>{e.preventDefault();const label=$("#preset-label").value.trim(),concern=$("#preset-concern").value.trim(),themeId=$("#preset-theme").value;if(!label||concern.length<5||!state.themes.some(t=>t.id===themeId))return toast("입력을 확인해 주세요.");if(state.presets.length>=100&&!state.editingPresetId)return toast("키워드는 최대 100개까지 저장할 수 있습니다.");const p={id:state.editingPresetId||String(Date.now())+"-"+Math.random().toString(36).slice(2,7),label,concern,themeId};if(state.editingPresetId)state.presets=state.presets.map(x=>x.id===state.editingPresetId?p:x);else state.presets.push(p);storePresets();resetPresetForm();renderPresets();toast("키워드를 저장했어요.");});
+    $("#export-settings").onclick=()=>{const data=JSON.stringify({version:1,presets:state.presets},null,2);const url=URL.createObjectURL(new Blob([data],{type:"application/json"}));const a=createNode("a");a.href=url;a.download="reading-prescription-keywords.json";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+    $("#import-settings").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;if(file.size>200000)return toast("설정 파일이 너무 큽니다.");try{const data=JSON.parse(await file.text());if(data.version!==1||!Array.isArray(data.presets)||data.presets.length>100)throw Error("bad schema");const incoming=data.presets.map(p=>({id:String(p.id||""),label:String(p.label||"").trim().slice(0,28),concern:String(p.concern||"").trim().slice(0,600),themeId:String(p.themeId||"")}));if(incoming.some(p=>!p.id||!p.label||p.concern.length<5||!state.themes.some(t=>t.id===p.themeId)))throw Error("invalid preset");if(!confirm("현재 직접 등록한 키워드를 가져온 설정으로 바꿀까요?"))return;state.presets=incoming;storePresets();renderPresets();resetPresetForm();toast("키워드를 가져왔어요.");}catch{toast("올바른 설정 파일이 아닙니다.");}finally{e.target.value="";}});
+  }
+  function submitConcern(concern,forcedThemeId=null){if(concern.length<5){toast("고민을 조금 더 자세히 적어주세요.");return;}const theme=state.themes.find(t=>t.id===forcedThemeId)||themeFor(concern);const record={id:Date.now(),concern,themeId:theme.id,created:new Date().toISOString()};state.records.unshift(record);state.records=state.records.slice(0,20);saveHistory();renderRecord(record);renderHistory();}
   function handleConcern(event){
     event.preventDefault();
     const concern=$("#concern").value.trim();
-    if (concern.length<5){toast("고민을 조금 더 자세히 적어주세요.");return;}
-    const theme=themeFor(concern);
-    const record={id:Date.now(),concern,themeId:theme.id,created:new Date().toISOString()};
-    state.records.unshift(record);
-    state.records=state.records.slice(0,20);
-    saveHistory();
-    renderRecord(record);
-    renderHistory();
+    submitConcern(concern);
   }
   async function init(){
     try {
@@ -181,14 +195,12 @@
       ));
       state.catalog=catalog;state.external=external;state.themes=themes;
       [...catalog,...external].forEach(book=>state.books.set(String(book.id),book));
+      setupPresetManager();
       state.records=safeReadHistory();
       renderHistory();
       $("#prescription-form").addEventListener("submit",handleConcern);
       $("#concern").addEventListener("input",e=>$("#count").textContent=`${e.target.value.length} / 1200`);
-      document.querySelectorAll("[data-example]").forEach(button=>button.addEventListener("click",()=>{
-        $("#concern").value=button.dataset.example;
-        $("#count").textContent=`${button.dataset.example.length} / 1200`;
-      }));
+      document.querySelectorAll("[data-example]").forEach(button=>button.addEventListener("click",()=>{const concern=button.dataset.example;$("#concern").value=concern;$("#count").textContent=`${concern.length} / 1200`;submitConcern(concern);}));
       $("#clear-history").onclick=()=>{
         if(confirm("이 브라우저에 저장된 독서 처방 기록을 모두 삭제할까요?")){
           state.records=[];saveHistory();renderHistory();toast("기록을 모두 삭제했어요.");

@@ -248,7 +248,11 @@
       "society",
       "history"
     ],
-    "41": [],
+    "41": [
+      "society",
+      "relationships",
+      "meaning"
+    ],
     "42": [
       "esteem",
       "failure",
@@ -328,7 +332,11 @@
       "learning",
       "history"
     ],
-    "54": [],
+    "54": [
+      "art",
+      "identity",
+      "relationships"
+    ],
     "55": [
       "burnout",
       "meaning",
@@ -708,7 +716,12 @@
       "technology",
       "nature"
     ],
-    "111": [],
+    "111": [
+      "history",
+      "society",
+      "responsibility",
+      "grief"
+    ],
     "e1": [
       "future",
       "esteem",
@@ -803,7 +816,11 @@
       "habits",
       "focus"
     ],
-    "e15": [],
+    "e15": [
+      "meaning",
+      "grief",
+      "failure"
+    ],
     "e16": [
       "esteem",
       "failure",
@@ -905,7 +922,11 @@
       "art",
       "nature"
     ],
-    "e31": [],
+    "e31": [
+      "relationships",
+      "meaning",
+      "identity"
+    ],
     "e32": [
       "history"
     ],

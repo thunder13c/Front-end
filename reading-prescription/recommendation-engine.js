@@ -124,6 +124,7 @@
       for(const term of terms){
         const key=normal(term);
         if(key.length>1&&clean.includes(key)){
+          if(id==="art" && key==="화가" && /대화가/.test(clean) && !/화가가|화가로|화가되|화가의|화가를|화가인|직업화가/.test(clean))continue;
           if(id==="decisions"&&key==="선택"&&clean.includes("선택과집중"))continue;
           if(id==="meaning"&&key==="의미"&&!clean.includes("삶의의미"))continue;
           push(id, key.length>3?6:4,term);

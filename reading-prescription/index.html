@@ -31,6 +31,21 @@
           <div class="form-bottom"><span id="count">0 / 1200</span><button class="primary-button" type="submit">독서 처방 받기 <span aria-hidden="true">↗</span></button></div>
         </form>
         <div class="quick-prompts"><span>이런 고민도 좋아요</span><button type="button" data-example="요즘 일에 지치고 매일 반복되는 일상이 무의미하게 느껴져요.">번아웃</button><button type="button" data-example="앞으로의 미래가 막막하고 직장을 계속 다녀야 할지 모르겠어요.">미래·진로</button><button type="button" data-example="자꾸 다른 사람과 비교하게 되고 자신감이 떨어져요.">자존감</button><button type="button" data-example="사람들과 관계를 맺는 게 어렵고 자주 상처받아요.">인간관계</button></div>
+        <section class="preset-manager" aria-labelledby="preset-title">
+          <div class="preset-heading"><div><p class="eyebrow">MY CONCERNS & KEYWORDS</p><h3 id="preset-title">나만의 고민·키워드</h3><p class="manager-hint">버튼을 누르면 고민이 입력되고 즉시 3권을 추천합니다. 기본 버튼도 바로 추천됩니다.</p></div><button type="button" class="ghost-button" id="toggle-manager" aria-expanded="false">키워드 추가·관리 ＋</button></div>
+          <div id="custom-prompts" class="preset-buttons"></div>
+          <div id="manager-form" hidden>
+            <form id="preset-form" class="preset-form">
+              <label>버튼 이름<input id="preset-label" maxlength="28" required placeholder="예: 선택과 집중"></label>
+              <label>고민 내용<textarea id="preset-concern" rows="3" maxlength="600" minlength="5" required placeholder="예: 관심사가 너무 많아서 무엇에 집중해야 할지 모르겠어요."></textarea></label>
+              <label>추천 주제<select id="preset-theme"></select></label>
+              <div class="preset-actions"><button type="submit" class="primary-button" id="save-preset">키워드 저장</button><button type="button" class="ghost-button" id="cancel-edit" hidden>수정 취소</button></div>
+            </form>
+            <ul id="preset-list" class="preset-list"></ul>
+            <div class="backup-actions"><button type="button" class="ghost-button" id="export-settings">내 설정 내보내기 (.json)</button><label class="ghost-button import-label">설정 가져오기<input type="file" id="import-settings" accept="application/json,.json" hidden></label></div>
+            <p class="footnote">내가 추가한 고민과 키워드는 이 브라우저에만 저장됩니다. 다른 기기에서 사용하려면 설정 파일을 내보낸 뒤 가져오세요.</p>
+          </div>
+        </section>
       </section>
       <section id="results" class="results" hidden aria-live="polite">
         <div class="results-heading"><div><p class="eyebrow">02 / YOUR PRESCRIPTION</p><h2>마음에 건네는 세 권의 책</h2><p id="match-description" class="match-description"></p></div><button type="button" class="ghost-button" id="copy-all">처방전 전체 복사 <span>⧉</span></button></div>
